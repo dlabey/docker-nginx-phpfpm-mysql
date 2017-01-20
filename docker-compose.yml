@@ -1,0 +1,33 @@
+phpfpm:
+  restart: always
+  extends:
+    file: ./.docker/php-fpm-5.6.yml
+    service: phpfpm
+  links:
+    - mysql:db
+
+nginx:
+  restart: always
+  image: nginx
+  ports:
+    - "8080:80"
+  links:
+    - phpfpm
+  volumes:
+    - ./.docker/nginx/vhost.conf:/etc/nginx/conf.d/default.conf
+    - .:/var/www/html
+    - ./.docker/log/nginx:/var/log/nginx
+
+mysql:
+  restart: always
+  image: mysql
+  ports:
+    - "33060:3306"
+  environment:
+    MYSQL_ROOT_PASSWORD:
+    MYSQL_USER: user
+    MYSQL_PASSWORD:
+    MYSQL_DATABASE: database
+  volumes:
+    - ./.docker/mysql/databases:/var/lib/mysql
+    - ./.docker/log/mysql:/var/log/mysql
